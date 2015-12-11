@@ -43,7 +43,7 @@ Usage:
         genreq  NAME            generate certification request, NAME.tmpl required, NAME-cert.csr
         signreq NAME CA_NAME    create certificate from NAME-cert.csr, NAME-cert.pem
         to_p12  NAME [CA_NAME]  export to pkcs#12 NAME.p12, ca cert included if CA_NAME is valid
-        p7sign  NAME CA_NAME    sign NAME.mobileconfig to NAME.signed.mobileconfig
+        p7sign  NAME CA_NAME    sign NAME.mobileconfig to NAME.signed.mobileconfig, gnutls 3.4.x+ required
 
 
 USAGE
@@ -66,6 +66,7 @@ if [ -z $CERTTOOL ]; then
 fi
 echo "Using $CERTTOOL"
 
+CAPATH=
 CACERT=
 CAKEY=
 
@@ -77,60 +78,43 @@ function require_template()
     fi
 }
 
+function to_upper()
+{
+    echo $1 | tr '[a-z]' '[A-Z]'
+}
+
+function to_lower()
+{
+    echo $1 | tr '[A-Z]' '[a-z]'
+}
+
+function capath()
+{
+    UPPERNAME=$(to_upper $1)
+    LOWERNAME=$(to_lower $1)
+    CAPATH="$CAROOT/${UPPERNAME} CA/${LOWERNAME}_ca"
+}
+
 function cakey()
 {
-    case $1 in 
-    user)
-        RET="$CAROOT/USER CA/user_ca.key"
-    ;;    
+    capath $1
+    CAKEY="${CAPATH}.key"
 
-    public)
-        RET="$CAROOT/PUBLIC CA/public_ca.key"
-        ;;
-
-    app)
-        RET="$CAROOT/APP CA/app_ca.key"
-        ;;
-
-    proxy)
-        RET="$CAROOT/PROXY CA/proxy_ca.key"
-        ;;
-
-    *)
-        echo "Bad ca param"
-	exit
-        ;;
-    esac
-
-    CAKEY=$RET
+    if [ ! -f "${CAKEY}" ]; then
+        echo "${CAKEY}" not found
+        exit
+    fi
 }
 
 function cacert()
 {
-    case $1 in 
-    user)
-        RET="$CAROOT/USER CA/user_ca.pem"
-    ;;    
+    capath $1
+    CACERT="${CAPATH}.pem"
 
-    public)
-        RET="$CAROOT/PUBLIC CA/public_ca.pem"
-        ;;
-
-    app)
-        RET="$CAROOT/APP CA/app_ca.pem"
-        ;;
-
-    proxy)
-        RET="$CAROOT/PROXY CA/proxy_ca.pem"
-        ;;
-
-    *)
-        echo "Bad ca param"
-	exit
-        ;;
-    esac
-
-    CACERT=$RET
+    if [ ! -f "${CACERT}" ]; then
+        echo $CACERT not found
+        exit
+    fi
 }
 
 function genkey()
