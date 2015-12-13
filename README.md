@@ -5,7 +5,11 @@ Author: sskaje
 
 Basic CA related commands
 
+
+
 ## Usage
+**p7sign requires GnuTLS version > 3.4.7** 
+
 ```
 
 GnuTLS CA Script
@@ -17,8 +21,9 @@ Usage:
         genreq  NAME            generate certification request, NAME.tmpl required, NAME-cert.csr
         signreq NAME CA_NAME    create certificate from NAME-cert.csr, NAME-cert.pem
         to_p12  NAME [CA_NAME]  export to pkcs#12 NAME.p12, ca cert included if CA_NAME is valid
-        p7sign  NAME CA_NAME    sign NAME.mobileconfig to NAME.signed.mobileconfig, gnutls 3.4.x+ required
+        p7sign  NAME CA_NAME    sign NAME to NAME.signed, gnutls 3.4.x+ required
         gencrl  NAME CA_NAME    create CRL, NAME-crl.pem
+
 
 ```
 

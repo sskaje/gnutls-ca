@@ -44,7 +44,7 @@ Usage:
         genreq  NAME            generate certification request, NAME.tmpl required, NAME-cert.csr
         signreq NAME CA_NAME    create certificate from NAME-cert.csr, NAME-cert.pem
         to_p12  NAME [CA_NAME]  export to pkcs#12 NAME.p12, ca cert included if CA_NAME is valid
-        p7sign  NAME CA_NAME    sign NAME.mobileconfig to NAME.signed.mobileconfig, gnutls 3.4.x+ required
+        p7sign  NAME CA_NAME    sign NAME to NAME.signed, gnutls 3.4.x+ required
         gencrl  NAME CA_NAME    create CRL, NAME-crl.pem
 
 USAGE
@@ -178,8 +178,8 @@ function to_p12()
 function p7sign()
 {
     ca_load $2
-    echo $CERTTOOL --p7-sign --load-privkey "'${CAKEY}'" --load-certificate "'${CACERT}'" --infile $1.mobileconfig --outder --outfile $1.signed.mobileconfig
-    $CERTTOOL --p7-sign --load-privkey "${CAKEY}" --load-certificate "${CACERT}" --infile $1.mobileconfig --outder --outfile $1.signed.mobileconfig
+    echo $CERTTOOL --p7-sign --p7-include-cert --load-privkey "'${CAKEY}'" --load-certificate "'${CACERT}'" --infile $1 --outder --outfile $1.signed
+    $CERTTOOL --p7-sign --p7-include-cert --load-privkey "${CAKEY}" --load-certificate "${CACERT}" --infile $1 --outder --outfile $1.signed
 }
 
 function gencrl()
@@ -203,6 +203,10 @@ case $1 in
         ;;
 
     signreq)
+        signreq $2 $3
+        ;;
+
+    sign)
         signreq $2 $3
         ;;
 
